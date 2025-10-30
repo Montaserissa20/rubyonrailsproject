@@ -1,24 +1,30 @@
-# README
+# 🧱 Ruby on Rails RESTful API
 
-This README would normally document whatever steps are necessary to get the
-application up and running.
+## 📖 Description
+This project is a RESTful API application built with **Ruby on Rails**.  
+It includes five main models — **User**, **Article**, **Comment**, **Tag**, and **ArticleTag** — that support full CRUD (Create, Read, Update, Delete) operations.
 
-Things you may want to cover:
+The system defines relational connections between users, articles, comments, and tags.  
+When the server starts, it will display a simple message:  
+> **"The server is running"**
 
-* Ruby version
+You can then access the API data by visiting the appropriate **endpoints** (for example, `/api/v1/articles`, `/api/v1/comments`, etc.) using HTTP methods such as `GET`, `POST`, `PUT`, and `DELETE`.
 
-* System dependencies
+---
 
-* Configuration
+## ⚙️ Technologies Used
+- **Ruby version:** 3.4.7  
+- **Rails version:** 8.0.3  
+- **Database:** SQLite3  
+- **Frameworks:** Rack, Puma  
+- **API Style:** RESTful  
+- **Tools:** Bundler, ActiveRecord, ActionController
 
-* Database creation
+---
 
-* Database initialization
+## 🚀 Installation and Setup
 
-* How to run the test suite
-
-* Services (job queues, cache servers, search engines, etc.)
-
-* Deployment instructions
-
-* ...
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/<your-username>/<your-repo-name>.git
+   cd <your-repo-name>
