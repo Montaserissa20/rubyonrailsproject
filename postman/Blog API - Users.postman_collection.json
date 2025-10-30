@@ -1,0 +1,240 @@
+{
+  "info": {
+    "name": "Blog API - Users",
+    "_postman_id": "9a2b5b9c-7c8a-4e56-8c1d-2b9bfe2e5d31",
+    "description": "Postman collection for Users endpoints of the Blog API (Rails).",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "// Collection-level Pre-request: set expected body into saveResponseBody",
+          "function tryParseJSON(s) { try { return JSON.parse(s); } catch (e) { return null; } }",
+          "function readBody() {",
+          "  if (!pm.request.body) return null;",
+          "  if (pm.request.body.mode === 'raw') {",
+          "    const raw = pm.request.body.raw || '';",
+          "    const obj = tryParseJSON(raw);",
+          "    return obj && (obj.user || obj);",
+          "  }",
+          "  if (pm.request.body.mode === 'urlencoded') {",
+          "    const o = {};",
+          "    (pm.request.body.urlencoded || []).forEach(kv => { if (!kv.disabled) o[kv.key] = kv.value; });",
+          "    return o.user || o;",
+          "  }",
+          "  return null;",
+          "}",
+          "const method = pm.request.method;",
+          "if (['POST','PUT','PATCH'].includes(method)) {",
+          "  const bodyUser = readBody();",
+          "  if (bodyUser) {",
+          "    let expected = null;",
+          "    if (method === 'POST') {",
+          "      expected = bodyUser;",
+          "    } else {",
+          "      const prev = tryParseJSON(pm.environment.get('saveResponseBody') || '');",
+          "      if (prev && typeof prev === 'object') {",
+          "        expected = Object.assign({}, prev, bodyUser);",
+          "      } else {",
+          "        expected = bodyUser;",
+          "      }",
+          "    }",
+          "    pm.environment.set('saveResponseBody', JSON.stringify(expected));",
+          "  }",
+          "}"
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "// Collection-level Tests: compare actual vs saveResponseBody",
+          "const expectedRaw = pm.environment.get('saveResponseBody');",
+          "function tryParse(s){ try { return JSON.parse(s); } catch(e){ return s; } }",
+          "const text = pm.response.text();",
+          "const isArrayResponse = (() => { try { return Array.isArray(JSON.parse(text)); } catch(e){ return false; } })();",
+          "const isJSON = (pm.response.headers.get('Content-Type') || '').toLowerCase().includes('application/json');",
+          "const code = pm.response.code;",
+          "const hasBody = text.length > 0;",
+          "if (expectedRaw && isJSON && hasBody && !isArrayResponse && [200,201].includes(code)) {",
+          "  const expected = typeof expectedRaw === 'string' ? tryParse(expectedRaw) : expectedRaw;",
+          "  const actual = tryParse(text);",
+          "  const omit = ['id','created_at','updated_at','password_digest','password','password_confirmation'];",
+          "  function omitDeep(obj){",
+          "    if (Array.isArray(obj)) return obj.map(omitDeep);",
+          "    if (obj && typeof obj === 'object'){",
+          "      const out = {};",
+          "      Object.keys(obj).forEach(k => { if (!omit.includes(k)) out[k] = omitDeep(obj[k]); });",
+          "      return out;",
+          "    }",
+          "    return obj;",
+          "  }",
+          "  function sortDeep(v){",
+          "    if (Array.isArray(v)) return v.map(sortDeep);",
+          "    if (v && typeof v === 'object'){",
+          "      return Object.keys(v).sort().reduce((a,k)=>{ a[k]=sortDeep(v[k]); return a; },{});",
+          "    }",
+          "    return v;",
+          "  }",
+          "  const actualCmp = sortDeep(omitDeep(actual));",
+          "  const expectedCmp = sortDeep(omitDeep(expected));",
+          "  const equal = _.isEqual(actualCmp, expectedCmp);",
+          "  pm.test('Response matches saveResponseBody', function(){ pm.expect(equal, 'Actual and expected differ').to.be.true; });",
+          "  if (!equal) {",
+          "    pm.environment.set('saveResponseBody_diff', JSON.stringify({ expected: expected, actual: actual }, null, 2));",
+          "    console.log('Mismatch. Diff saved to env var: saveResponseBody_diff');",
+          "  }",
+          "} else {",
+          "  pm.test('Skipping body compare', function(){ pm.expect(true).to.be.true; });",
+          "}"
+        ]
+      }
+    }
+  ],
+  "item": [
+    {
+      "name": "List Users",
+      "request": {
+        "method": "GET",
+        "header": [
+          { "key": "Accept", "value": "application/json" }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/users",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "v1", "users"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Get User",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status is 200', function () {",
+              "  pm.response.to.have.status(200);",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [
+          { "key": "Accept", "value": "application/json" }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/users/{{userId}}",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "v1", "users", "{{userId}}"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Create User",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Created (201)', function () { pm.response.to.have.status(201); });",
+              "try {",
+              "  const data = pm.response.json();",
+              "  if (data && data.id) { pm.collectionVariables.set('userId', data.id); }",
+              "} catch (e) {}"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "Accept", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"user\": {\n    \"name\": \"Jane Doe\",\n    \"email\": \"jane@example.com\",\n    \"password\": \"password123\",\n    \"password_confirmation\": \"password123\"\n  }\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/users",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "v1", "users"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Update User",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('OK (200)', function () { pm.response.to.have.status(200); });"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "PATCH",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "Accept", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"user\": {\n    \"name\": \"Jane Updated\"\n  }\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/users/{{userId}}",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "v1", "users", "{{userId}}"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Delete User",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('No Content (204)', function () { pm.response.to.have.status(204); });"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "DELETE",
+        "header": [
+          { "key": "Accept", "value": "application/json" }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/users/{{userId}}",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "v1", "users", "{{userId}}"]
+        }
+      },
+      "response": []
+    }
+  ],
+  "variable": [
+    { "key": "baseUrl", "value": "http://127.0.0.1:3000" },
+    { "key": "userId", "value": "1" }
+  ]
+}

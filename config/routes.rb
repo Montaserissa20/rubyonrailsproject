@@ -15,5 +15,10 @@ Rails.application.routes.draw do
       delete "articles/:id/tags/:tag_id", to: "articles#detach_tag"
       post   "login", to: "auth#login"
     end
+     namespace :v2 do
+      resources :users, only: [:index, :show, :create, :update, :destroy]
+      # If you later add v2 versions of other resources, put them here.
+      # Example: resources :articles, only: [:index, :show]
+    end
   end
 end

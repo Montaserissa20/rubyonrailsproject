@@ -1,0 +1,12 @@
+{
+  "dependencies": {
+    "reporter": "^0.1.0"
+  },
+  "scripts": {
+    "postman:test": "node -e \"require('fs').mkdirSync('postman-reports',{recursive:true});\" && newman run \"node_modules/Rails API Tests.postman_collection.json\" -e \"node_modules/rails local.postman_environment.json\" -r json,html --reporter-json-export \"postman-reports/report.json\" --reporter-html-export \"postman-reports/report.html\""
+  },
+  "devDependencies": {
+    "newman": "^4.6.1",
+    "newman-reporter-html": "^1.0.5"
+  }
+}
