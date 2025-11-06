@@ -28,3 +28,7 @@ You can then access the API data by visiting the appropriate **endpoints** (for 
    ```bash
    git clone https://github.com/<your-username>/<your-repo-name>.git
    cd <your-repo-name>
+## Etik Bildirimi (Zorunlu)
+
+Bu proje, **Samsun Üniversitesi Yazılım Mühendisliği Bölümü "Yazılım Gerçekleşme ve Test" dersi** kapsamında  
+**Nurettin Şenyer** ve **Ömer Durmuş** rehberliğinde yapılmıştır.
